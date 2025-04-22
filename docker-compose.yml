@@ -1,0 +1,92 @@
+version: "3.8"
+
+services:
+  web:
+    build: ./ml_training
+    command: bash -c "uvicorn main:app --host=0.0.0.0 --port=8080 --reload"
+    ports:
+      - ${FASTAPI_PORT}:8080
+    volumes:
+      - ./ml_training/static:/ml_training/static
+      - ./ml_training/experiments:/ml_training/experiments
+      - ./ml_training/mlartifacts:/ml_training/mlartifacts
+      - ${TRITON_MODEL_REPOSITORY}:/models
+    env_file: ./.env
+    depends_on:
+      - worker
+      - mlflow
+      - rabbitmq
+      - triton_server
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - ml_training_net
+    
+  worker:
+    build: ./ml_training
+    command: celery -A ml_training.worker.app_worker worker --loglevel=DEBUG --concurrency=8
+    env_file: ./.env
+    volumes:
+      - ./ml_training/static:/ml_training/static
+      - ./ml_training/experiments:/ml_training/experiments
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      - rabbitmq
+    networks:
+      - ml_training_net
+
+  mlflow:
+    build: ./ml_training
+    command: mlflow server --app-name basic-auth --workers 1 --backend-store-uri ./ml_training/mlruns --artifacts-destination ./ml_training/mlartifacts --host 0.0.0.0 --port ${MLFLOW_PORT}
+    env_file: ./ml_training/.env
+    volumes:
+      - ./ml_training/mlruns:/app/mlruns
+      - ./ml_training/mlartifacts:/app/mlartifacts
+    ports:
+      - ${MLFLOW_PORT}:5000
+    networks:
+      - ml_training_net
+    
+  triton_server:
+    image: nvcr.io/nvidia/tritonserver:23.07-py3
+    command: ["tritonserver", "--model-repository=/models", "--model-control-mode=explicit", "--load-model=*"]
+    volumes:
+      - ${TRITON_MODEL_REPOSITORY}:/models
+    ports:
+      - ${TRITON_PORT}:8000
+      - ${TRITON_PORT1}:8001
+      - ${TRITON_PORT2}:8002
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - ml_training_net
+  
+  rabbitmq:
+    image: rabbitmq
+    ports:
+      - 7672:5672
+    environment: 
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit.log.console.level error
+    networks:
+      - ml_training_net
+
+networks:
+  ml_training_net:
+    driver: bridge
+
