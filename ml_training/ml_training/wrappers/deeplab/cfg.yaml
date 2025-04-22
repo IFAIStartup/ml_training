@@ -1,0 +1,18 @@
+DATA:
+  name: ''
+  dataset_dir: /home/student2/workspace/ml_traning/datasets/geoai_aerial_deeplab_26012024__v_2
+  # num_classes: 3
+  classes: ["roads", "tracks"]
+  img_size: 640
+  channels: 3
+
+TRAIN:
+  encoder: resnet50
+  pretrained: 
+  learning_rate: 0.0001
+  workers: 0
+  batch_size: 8
+  epochs: 2 # 100
+  save_period: 1
+  valid: True
+  gpus: [ 0 ]
