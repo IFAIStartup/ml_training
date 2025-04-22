@@ -30,7 +30,7 @@ def get_dataset_nextcloud(id: int, path: str):
     nextcloud_url = os.getenv("NEXTCLOUD_URL")
     nextcloud_path = "index.php/apps/files/ajax/download.php?dir="
     url = f"{nextcloud_url}/{nextcloud_path}{path}"
-    response = requests.get(url, auth=("airflow", "airflow"), stream=True)
+    response = requests.get(url, auth=("Admin123", "Work@123"), stream=True)
     file_handle = open(f"/app/datasets/{id}/{path}.zip", "wb", 8192)
     for chunk in response.iter_content(8192):
         file_handle.write(chunk)
