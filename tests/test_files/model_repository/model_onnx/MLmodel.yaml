@@ -1,0 +1,26 @@
+artifact_path: model_onnx
+flavors:
+  onnx:
+    code: null
+    data: model.onnx
+    onnx_session_options: null
+    onnx_version: 1.15.0
+    providers:
+    - CUDAExecutionProvider
+    - CPUExecutionProvider
+  python_function:
+    data: model.onnx
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.onnx
+    python_version: 3.10.12
+mlflow_version: 2.10.0
+model_size_bytes: 261
+model_uuid: b16fb1b81f5a456191295bb2f1a9963c
+run_id: 32e514aa7a544183a8188d6c07970eb6
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float32", "shape": [-1]}}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float32", "shape": [-1]}}]'
+  params: null
+utc_time_created: '2024-02-05 22:36:45.751971'
