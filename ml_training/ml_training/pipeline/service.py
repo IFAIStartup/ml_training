@@ -37,7 +37,7 @@ def get_dataset_nextcloud_service(id: str, path: str) -> Union[None, Exception]:
 
 def upload_model_nextcloud_service(id: int, name_zip: str):
     file_handle = open(f"static/{id}/{name_zip}", "rb")
-    url = f"{settings.NEXTCLOUD_URL}/remote.php/dav/files/airflow/{name_zip}"
+    url = f"{settings.NEXTCLOUD_URL}/remote.php/dav/files/Admin123/{name_zip}"
     response = requests.put(
         url,
         auth=(settings.NEXTCLOUD_LOGIN, settings.NEXTCLOUD_PASSWORD),
